@@ -7,6 +7,7 @@ PokéAPI asks all users to follow its fair use policy, which includes caching re
 The following endpoints are covered in this document.
 
 - `GET /pokemon/{id or name}` — find a Pokémon by its ID or name
+- `GET /pokemon` — get a paginated list of Pokémon
 
 ## Find a Pokémon by ID or Name
 
@@ -81,5 +82,64 @@ The response also contains other fields, including `base_experience`, `species`,
 | Status | Meaning |
 |---|---|
 | `200 OK` | The Pokémon is returned |
-| `404 Not Found` | This Pokemon with mentioned name or Id wasn't found | 
+| `404 Not Found` | No Pokémon exists with the given ID or name |
 
+## List Pokémon
+
+**Method:** `GET`
+
+**Path:** `/pokemon`
+
+This endpoint returns a paginated list of Pokémon. Each item in the list has only a `name` and a `url`. To get the full details of a Pokémon, request its `url`, which is the `/pokemon/{id or name}` endpoint described above.
+
+**Query Parameters:**
+
+| Parameter | Required | Description |
+|---|---|---|
+| `limit` | No | Maximum number of Pokémon to return. If omitted, 20 are returned. |
+| `offset` | No | Number of Pokémon to skip before the list begins. If omitted, nothing is skipped (`0`). |
+
+For example, `GET /pokemon?limit=3&offset=3` skips the first 3 Pokémon and returns the next 3 (Pokémon 4, 5 and 6).
+
+**Response Fields:**
+
+| Field | Description |
+|---|---|
+| `count` | Total number of Pokémon available. This stays the same whatever `limit` and `offset` you use. |
+| `next` | URL of the next page of results |
+| `previous` | URL of the previous page of results, or `null` on the first page |
+| `results` | Array of the Pokémon on this page. Each item has a `name` and a `url` |
+
+The response does not include `limit` or `offset`. Use the `next` and `previous` links to move between pages.
+
+**Response Example:**
+
+The example below is the response for `GET /pokemon?limit=3&offset=3`.
+
+```json
+{
+  "count": 1351,
+  "next": "https://pokeapi.co/api/v2/pokemon?offset=6&limit=3",
+  "previous": "https://pokeapi.co/api/v2/pokemon?offset=0&limit=3",
+  "results": [
+    {
+      "name": "charmander",
+      "url": "https://pokeapi.co/api/v2/pokemon/4/"
+    },
+    {
+      "name": "charmeleon",
+      "url": "https://pokeapi.co/api/v2/pokemon/5/"
+    },
+    {
+      "name": "charizard",
+      "url": "https://pokeapi.co/api/v2/pokemon/6/"
+    }
+  ]
+}
+```
+
+**Possible Responses:**
+
+| Status | Meaning |
+|---|---|
+| `200 OK` | The list of Pokémon is returned |
