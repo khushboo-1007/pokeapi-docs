@@ -8,6 +8,7 @@ The following endpoints are covered in this document.
 
 - `GET /pokemon/{id or name}` — find a Pokémon by its ID or name
 - `GET /pokemon` — get a paginated list of Pokémon
+- `GET /type/{id or name}` — find a type by its ID or name
 
 ## Find a Pokémon by ID or Name
 
@@ -143,3 +144,94 @@ The example below is the response for `GET /pokemon?limit=3&offset=3`.
 | Status | Meaning |
 |---|---|
 | `200 OK` | The list of Pokémon is returned |
+
+## Find a Type by ID or Name
+
+**Method:** `GET`
+
+**Path:** `/type/{id or name}`
+
+**Path Parameters:**
+
+| Parameter | Required | Description |
+|---|---|---|
+| `id or name` | Yes | The ID (for example `1`) or the name (for example `normal`) of the type to retrieve |
+
+This endpoint returns the details of one Pokémon type, such as `normal`: how the type does against other types, and which Pokémon and moves have it. `/type/1` and `/type/normal` both return the normal type.
+
+**Response Fields:**
+
+The fields `id` and `name` are self-explanatory. The fields below hold lists of related items.
+
+| Field | Description |
+|---|---|
+| `damage_relations` | How this type does against other types. It has six lists: `no_damage_to`, `half_damage_to`, `double_damage_to`, `no_damage_from`, `half_damage_from` and `double_damage_from`. The `_to` lists are the types that this type attacks, and the `_from` lists are the types that attack this type. Each item is a type with a `name` and a `url`. |
+| `pokemon` | Array of the Pokémon that have this type. Each item has a `slot` and a `pokemon` object with its `name` and `url` |
+| `moves` | Array of the moves of this type. Each item has a `name` and a `url` |
+
+For example, `double_damage_from` containing `fighting` means that Fighting-type attacks do double damage to the normal type.
+
+**Response Example:**
+
+The response also contains other fields, including `past_damage_relations`, `game_indices`, `generation`, `move_damage_class`, `names` and `sprites`. They are omitted from the example below for brevity. The `pokemon` and `moves` lists contain many items, and only one of each is shown.
+
+```json
+{
+  "id": 1,
+  "name": "normal",
+  "damage_relations": {
+    "no_damage_to": [
+      {
+        "name": "ghost",
+        "url": "https://pokeapi.co/api/v2/type/8/"
+      }
+    ],
+    "half_damage_to": [
+      {
+        "name": "rock",
+        "url": "https://pokeapi.co/api/v2/type/6/"
+      },
+      {
+        "name": "steel",
+        "url": "https://pokeapi.co/api/v2/type/9/"
+      }
+    ],
+    "double_damage_to": [],
+    "no_damage_from": [
+      {
+        "name": "ghost",
+        "url": "https://pokeapi.co/api/v2/type/8/"
+      }
+    ],
+    "half_damage_from": [],
+    "double_damage_from": [
+      {
+        "name": "fighting",
+        "url": "https://pokeapi.co/api/v2/type/2/"
+      }
+    ]
+  },
+  "pokemon": [
+    {
+      "slot": 1,
+      "pokemon": {
+        "name": "pidgey",
+        "url": "https://pokeapi.co/api/v2/pokemon/16/"
+      }
+    }
+  ],
+  "moves": [
+    {
+      "name": "pound",
+      "url": "https://pokeapi.co/api/v2/move/1/"
+    }
+  ]
+}
+```
+
+**Possible Responses:**
+
+| Status | Meaning |
+|---|---|
+| `200 OK` | The type is returned |
+| `404 Not Found` | No type exists with the given ID or name |
